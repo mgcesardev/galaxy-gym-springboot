@@ -4,14 +4,18 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import cmg.example.galaxy_gym_backend.models.Exercise.DifficultyLevel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "workout_routines")
+@EntityListeners(AuditingEntityListener.class)
+@Data
 @NoArgsConstructor
-@SuppressWarnings("unused")
+@AllArgsConstructor
 public class WorkoutRoutine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
