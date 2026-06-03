@@ -1,7 +1,9 @@
-package cmg.example.galaxy_gym_backend.models;
+package cmg.example.galaxy_gym_backend.DTO;
 
 import lombok.Data;
 import java.math.BigDecimal;
+
+import cmg.example.galaxy_gym_backend.models.Membership;
 import jakarta.validation.constraints.*;
 
 @Data

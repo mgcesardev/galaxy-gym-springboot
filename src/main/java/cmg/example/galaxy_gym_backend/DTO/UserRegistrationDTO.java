@@ -1,6 +1,7 @@
-package cmg.example.galaxy_gym_backend.models;
+package cmg.example.galaxy_gym_backend.DTO;
 
 
+import cmg.example.galaxy_gym_backend.models.User;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 

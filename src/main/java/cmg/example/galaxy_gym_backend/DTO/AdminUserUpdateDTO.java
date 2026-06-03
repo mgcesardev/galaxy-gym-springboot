@@ -1,4 +1,4 @@
-package cmg.example.galaxy_gym_backend.models;
+package cmg.example.galaxy_gym_backend.DTO;
 
 import lombok.Data;
 import java.util.Set;
