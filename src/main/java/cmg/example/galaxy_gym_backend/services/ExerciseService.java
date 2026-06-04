@@ -13,4 +13,6 @@ public interface ExerciseService {
     public Exercise save(Exercise model);
 
     Page<Exercise> buscarPorNombre(String nombre, Pageable pageable);
+
+    void delete(Long id);
 }

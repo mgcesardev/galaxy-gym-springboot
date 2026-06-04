@@ -14,4 +14,6 @@ public interface EquipmentService {
 
     Page<Equipment> buscarPorNombre(String nombre, Pageable pageable);
 
+    void delete(Long id);
+
 }

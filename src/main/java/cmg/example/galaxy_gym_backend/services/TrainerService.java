@@ -12,5 +12,6 @@ public interface TrainerService {
 
     public Trainer save(Trainer model);
 
-    Page<Trainer> buscarPorNombre(String nombre, Pageable pageable);
+
+    void delete(Long id);
 }

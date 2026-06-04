@@ -12,6 +12,7 @@ public interface MembershipService {
 
     public Membership save(Membership model);
 
-    Page<Membership> buscarPorNombre(String nombre, Pageable pageable);
+
+    void delete(Long id);
 
 }

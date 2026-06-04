@@ -12,6 +12,6 @@ public interface ReservationService {
 
     public Reservation save(Reservation model);
 
-    Page<Reservation> buscarPorNombre(String nombre, Pageable pageable);
+    void delete(Long id);
 
 }
