@@ -7,10 +7,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 @Entity
 @Table(name = "trainers")
+@EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Trainer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +53,7 @@ public class Trainer {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "trainer")
-    private Set<Class> classes;
+    private Set<GymClass> classes;
 
     @OneToMany(mappedBy = "trainer")
     private Set<WorkoutRoutine> routines;

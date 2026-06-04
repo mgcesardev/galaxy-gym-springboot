@@ -3,14 +3,19 @@ package cmg.example.galaxy_gym_backend.models;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Set;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
+@Data
 @NoArgsConstructor
-@SuppressWarnings("unused")
+@AllArgsConstructor
 public class User {
 
     @Id

@@ -4,14 +4,18 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import cmg.example.galaxy_gym_backend.models.Membership.PaymentMethod;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "payments")
+@EntityListeners(AuditingEntityListener.class)
+@Data
 @NoArgsConstructor
-@SuppressWarnings("unused")
+@AllArgsConstructor
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

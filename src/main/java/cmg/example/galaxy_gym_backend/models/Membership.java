@@ -4,12 +4,17 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "memberships")
+@EntityListeners(AuditingEntityListener.class)
+@Data
 @NoArgsConstructor
-@SuppressWarnings("unused")
+@AllArgsConstructor
 public class Membership {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

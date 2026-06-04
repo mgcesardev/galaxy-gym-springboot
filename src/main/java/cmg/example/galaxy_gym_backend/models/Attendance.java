@@ -2,12 +2,17 @@ package cmg.example.galaxy_gym_backend.models;
 
 import lombok.*;
 import java.time.LocalDateTime;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "attendances")
+@EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Attendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
