@@ -12,6 +12,7 @@ public interface PaymentService {
 
     public Payment save(Payment model);
 
-    Page<Payment> buscarPorNombre(String nombre, Pageable pageable);
+
+    void delete(Long id);
 
 }

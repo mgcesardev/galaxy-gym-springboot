@@ -13,4 +13,6 @@ public interface WorkoutRoutineService {
     public WorkoutRoutine save(WorkoutRoutine model);
 
     Page<WorkoutRoutine> buscarPorNombre(String nombre, Pageable pageable);
+
+    void delete(Long id);
 }

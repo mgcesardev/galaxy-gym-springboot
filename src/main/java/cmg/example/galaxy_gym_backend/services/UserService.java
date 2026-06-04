@@ -13,4 +13,8 @@ public interface UserService {
     public User save(User model);
 
     Page<User> buscarPorNombre(String nombre, Pageable pageable);
+
+    void delete(Long id);
+
+    Page<User> buscarPorCorreo(String correo, Pageable pageable);
 }

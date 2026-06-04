@@ -15,4 +15,6 @@ public interface GymClassService {
 
     Page<GymClass> buscarPorNombre(String nombre, Pageable pageable);
 
+    void delete(Long id);
+
 }

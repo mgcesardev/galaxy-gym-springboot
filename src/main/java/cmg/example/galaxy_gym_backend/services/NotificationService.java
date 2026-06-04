@@ -12,6 +12,8 @@ public interface NotificationService {
 
     public Notification save(Notification model);
 
-    Page<Notification> buscarPorNombre(String nombre, Pageable pageable);
+    void delete(Long id);
+
+    Page<Notification> buscarPorTitulo(String titulo, Pageable pageable);
 
 }

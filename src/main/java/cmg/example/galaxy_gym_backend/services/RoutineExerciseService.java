@@ -12,6 +12,7 @@ public interface RoutineExerciseService {
 
     public RoutineExercise save(RoutineExercise model);
 
-    Page<RoutineExercise> buscarPorNombre(String nombre, Pageable pageable);
+
+    void delete(Long id);
 
 }

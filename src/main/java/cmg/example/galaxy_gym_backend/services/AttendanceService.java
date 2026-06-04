@@ -12,7 +12,7 @@ public interface AttendanceService {
 
     public Attendance save(Attendance model);
 
-    Page<Attendance> buscarPorNombre(String nombre, Pageable pageable);
+    void delete(Long id);
 
 
 }

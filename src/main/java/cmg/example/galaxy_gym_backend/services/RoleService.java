@@ -13,6 +13,8 @@ public interface RoleService {
     public Role save(Role model);
 
     Page<Role> buscarPorNombre(String nombre, Pageable pageable);
+
+    void delete(Long id);
     
 
 }
