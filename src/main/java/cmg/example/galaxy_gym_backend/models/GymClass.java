@@ -11,12 +11,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 @Entity
-@Table(name = "classes")
+@Table(name = "gymClasses")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Class {
+public class GymClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -24,7 +24,7 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)
-    private Class classEntity;
+    private GymClass classEntity;
 
     private LocalDateTime reservationDate;
 

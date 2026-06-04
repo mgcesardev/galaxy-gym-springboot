@@ -53,7 +53,7 @@ public class Trainer {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "trainer")
-    private Set<Class> classes;
+    private Set<GymClass> classes;
 
     @OneToMany(mappedBy = "trainer")
     private Set<WorkoutRoutine> routines;
