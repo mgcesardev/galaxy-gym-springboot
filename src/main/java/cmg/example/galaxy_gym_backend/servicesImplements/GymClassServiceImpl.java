@@ -22,49 +22,29 @@ public class GymClassServiceImpl implements GymClassService {
     @Override
     @Transactional(readOnly = true)
     public Page<GymClass> findAll(Pageable pageable) {
-        try {
-            return gymClassRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todas las clases", e);
-        }
+        return gymClassRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public GymClass findById(Long id) {
-        try {
-            return gymClassRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar clase con id " + id + ": " + e.getMessage());
-        }
+        return gymClassRepository.findById(id).orElse(null);
     }
 
     @Override
     public GymClass save(GymClass model) {
-        try {
-            return gymClassRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar clase: " + e.getMessage());
-        }
+        return gymClassRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            gymClassRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar clase con id " + id + ": " + e.getMessage());
-        }
+        gymClassRepository.deleteById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<GymClass> buscarPorNombre(String nombre, Pageable pageable) {
-        try {
-            return gymClassRepository.buscarPorNombre(nombre, pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar clase por nombre: " + e.getMessage());
-        }
+        return gymClassRepository.buscarPorNombre(nombre, pageable);
     }
 
 }

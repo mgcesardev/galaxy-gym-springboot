@@ -19,45 +19,26 @@ public class AttendanceServiceImpl implements AttendanceService {
         this.attendanceRepository = attendanceRepository;
     }
     
-
     @Override
     @Transactional(readOnly = true)
     public Page<Attendance> findAll(Pageable pageable) {
-        try {
-            return attendanceRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todas las asistencias", e);
-        }
+        return attendanceRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Attendance findById(Long id) {
-        try {
-            return attendanceRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Error al encontrar asistencia con id " + id + ": " + e.getMessage());
-        }
+        return attendanceRepository.findById(id).orElse(null);
     }
 
     @Override
     public Attendance save(Attendance model) {
-        try {
-            return attendanceRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar asistencia: " + e.getMessage());
-        }
+        return attendanceRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            attendanceRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar asistencia con id " + id + ": " + e.getMessage());
-        }
+        attendanceRepository.deleteById(id);
     }
-
 
 }

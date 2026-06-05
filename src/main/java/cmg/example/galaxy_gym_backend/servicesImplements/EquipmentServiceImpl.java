@@ -22,49 +22,29 @@ public class EquipmentServiceImpl implements EquipmentService {
     @Override
     @Transactional(readOnly = true)
     public Page<Equipment> findAll(Pageable pageable) {
-        try {
-            return equipmentRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todos los equipos", e);
-        }
+        return equipmentRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Equipment findById(Long id) {
-        try {
-            return equipmentRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar equipo con id " + id + ": " + e.getMessage());
-        }
+        return equipmentRepository.findById(id).orElse(null);
     }
 
     @Override
     public Equipment save(Equipment model) {
-        try {
-            return equipmentRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar equipo: " + e.getMessage());
-        }
+        return equipmentRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            equipmentRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar equipo con id " + id + ": " + e.getMessage());
-        }
+        equipmentRepository.deleteById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Equipment> buscarPorNombre(String nombre, Pageable pageable) {
-        try {
-            return equipmentRepository.buscarPorNombre(nombre, pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar equipo por nombre: " + e.getMessage());
-        }
+        return equipmentRepository.buscarPorNombre(nombre, pageable);
     }
 
 }

@@ -22,41 +22,23 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     @Transactional(readOnly = true)
     public Page<Trainer> findAll(Pageable pageable) {
-        try {
-            return trainerRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todos los entrenadores", e);
-        }
+        return trainerRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Trainer findById(Long id) {
-        try {
-            return trainerRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar entrenador con id " + id + ": " + e.getMessage());
-        }
+        return trainerRepository.findById(id).orElse(null);
     }
 
     @Override
     public Trainer save(Trainer model) {
-        try {
-            return trainerRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar entrenador: " + e.getMessage());
-        }
+        return trainerRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            trainerRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar entrenador con id " + id + ": " + e.getMessage());
-        }
+        trainerRepository.deleteById(id);
     }
-
-    
 
 }

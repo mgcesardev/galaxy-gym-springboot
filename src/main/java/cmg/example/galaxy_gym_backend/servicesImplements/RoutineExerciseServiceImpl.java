@@ -22,40 +22,23 @@ public class RoutineExerciseServiceImpl implements RoutineExerciseService {
     @Override
     @Transactional(readOnly = true)
     public Page<RoutineExercise> findAll(Pageable pageable) {
-        try {
-            return routineExerciseRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todas las rutinas de ejercicios", e);
-        }
+        return routineExerciseRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public RoutineExercise findById(Long id) {
-        try {
-            return routineExerciseRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar rutina de ejercicios con id " + id + ": " + e.getMessage());
-        }
+        return routineExerciseRepository.findById(id).orElse(null);
     }
 
     @Override
     public RoutineExercise save(RoutineExercise model) {
-        try {
-            return routineExerciseRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar rutina de ejercicios: " + e.getMessage());
-        }
+        return routineExerciseRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            routineExerciseRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar rutina de ejercicios con id " + id + ": " + e.getMessage());
-        }
+        routineExerciseRepository.deleteById(id);
     }
-
 
 }
