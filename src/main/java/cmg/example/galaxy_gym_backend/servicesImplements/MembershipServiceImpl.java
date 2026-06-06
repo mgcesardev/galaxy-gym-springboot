@@ -22,40 +22,23 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     @Transactional(readOnly = true)
     public Page<Membership> findAll(Pageable pageable) {
-        try {
-            return membershipRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todas las membresías", e);
-        }
+        return membershipRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Membership findById(Long id) {
-        try {
-            return membershipRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar membresía con id " + id + ": " + e.getMessage());
-        }
+        return membershipRepository.findById(id).orElse(null);
     }
 
     @Override
     public Membership save(Membership model) {
-        try {
-            return membershipRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar membresía: " + e.getMessage());
-        }
+        return membershipRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            membershipRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar membresía con id " + id + ": " + e.getMessage());
-        }
+        membershipRepository.deleteById(id);
     }
-
 
 }

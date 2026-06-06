@@ -22,40 +22,23 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional(readOnly = true)
     public Page<Reservation> findAll(Pageable pageable) {
-        try {
-            return reservationRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todas las reservaciones", e);
-        }
+        return reservationRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Reservation findById(Long id) {
-        try {
-            return reservationRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar reservación con id " + id + ": " + e.getMessage());
-        }
+        return reservationRepository.findById(id).orElse(null);
     }
 
     @Override
     public Reservation save(Reservation model) {
-        try {
-            return reservationRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar reservación: " + e.getMessage());
-        }
+        return reservationRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            reservationRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar reservación con id " + id + ": " + e.getMessage());
-        }
+        reservationRepository.deleteById(id);
     }
-
 
 }

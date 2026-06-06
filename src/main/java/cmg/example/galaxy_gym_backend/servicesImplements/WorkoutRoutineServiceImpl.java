@@ -22,48 +22,28 @@ public class WorkoutRoutineServiceImpl implements WorkoutRoutineService {
     @Override
     @Transactional(readOnly = true)
     public Page<WorkoutRoutine> findAll(Pageable pageable) {
-        try {
-            return workoutRoutineRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todas las rutinas de ejercicios", e);
-        }
+        return workoutRoutineRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public WorkoutRoutine findById(Long id) {
-        try {
-            return workoutRoutineRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar rutina de ejercicios con id " + id + ": " + e.getMessage());
-        }
+        return workoutRoutineRepository.findById(id).orElse(null);
     }
 
     @Override
     public WorkoutRoutine save(WorkoutRoutine model) {
-        try {
-            return workoutRoutineRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar rutina de ejercicios: " + e.getMessage());
-        }
+        return workoutRoutineRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            workoutRoutineRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar rutina de ejercicios con id " + id + ": " + e.getMessage());
-        }
+        workoutRoutineRepository.deleteById(id);
     }
 
     @Override
     public Page<WorkoutRoutine> buscarPorNombre(String nombre, Pageable pageable) {
-        try {
-            return workoutRoutineRepository.buscarPorNombre(nombre, pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar rutina de ejercicios por nombre: " + e.getMessage());
-        }
+        return workoutRoutineRepository.buscarPorNombre(nombre, pageable);
     }
 
 }

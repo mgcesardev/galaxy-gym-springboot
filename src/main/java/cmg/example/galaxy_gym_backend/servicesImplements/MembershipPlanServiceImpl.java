@@ -22,49 +22,29 @@ public class MembershipPlanServiceImpl implements MembershipPlanService {
     @Override
     @Transactional(readOnly = true)
     public Page<MembershipPlan> findAll(Pageable pageable) {
-        try {
-            return membershipPlanRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todos los planes de membresía", e);
-        }
+        return membershipPlanRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public MembershipPlan findById(Long id) {
-        try {
-            return membershipPlanRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar plan de membresía con id " + id + ": " + e.getMessage());
-        }
+        return membershipPlanRepository.findById(id).orElse(null);
     }
 
     @Override
     public MembershipPlan save(MembershipPlan model) {
-        try {
-            return membershipPlanRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar plan de membresía: " + e.getMessage());
-        }
+        return membershipPlanRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            membershipPlanRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar plan de membresía con id " + id + ": " + e.getMessage());
-        }
+        membershipPlanRepository.deleteById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<MembershipPlan> buscarPorNombre(String nombre, Pageable pageable) {
-        try {
-            return membershipPlanRepository.buscarPorNombre(nombre, pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar plan de membresía por nombre: " + e.getMessage());
-        }
+        return membershipPlanRepository.buscarPorNombre(nombre, pageable);
     }
 
 }

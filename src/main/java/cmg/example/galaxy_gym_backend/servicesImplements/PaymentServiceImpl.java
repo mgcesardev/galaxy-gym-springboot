@@ -22,40 +22,23 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional(readOnly = true)
     public Page<Payment> findAll(Pageable pageable) {
-        try {
-            return paymentRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todos los pagos", e);
-        }
+        return paymentRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Payment findById(Long id) {
-        try {
-            return paymentRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar pago con id " + id + ": " + e.getMessage());
-        }
+        return paymentRepository.findById(id).orElse(null);
     }
 
     @Override
     public Payment save(Payment model) {
-        try {
-            return paymentRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar pago: " + e.getMessage());
-        }
+        return paymentRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            paymentRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar pago con id " + id + ": " + e.getMessage());
-        }
+        paymentRepository.deleteById(id);
     }
-
 
 }

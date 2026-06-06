@@ -22,49 +22,29 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(readOnly = true)
     public Page<Role> findAll(Pageable pageable) {
-        try {
-            return roleRepository.findAll(pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar todos los roles", e);
-        }
+        return roleRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Role findById(Long id) {
-        try {
-            return roleRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar rol con id " + id + ": " + e.getMessage());
-        }
+        return roleRepository.findById(id).orElse(null);
     }
 
     @Override
     public Role save(Role model) {
-        try {
-            return roleRepository.save(model);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar rol: " + e.getMessage());
-        }
+        return roleRepository.save(model);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            roleRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar rol con id " + id + ": " + e.getMessage());
-        }
+        roleRepository.deleteById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Role> buscarPorNombre(String nombre, Pageable pageable) {
-        try {
-            return roleRepository.buscarPorNombre(nombre, pageable);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al buscar rol por nombre: " + e.getMessage());
-        }
+        return roleRepository.buscarPorNombre(nombre, pageable);
     }
 
 }
