@@ -9,8 +9,11 @@ import cmg.example.galaxy_gym_backend.repositories.RoleRepository;
 import cmg.example.galaxy_gym_backend.repositories.UserRepository;
 import cmg.example.galaxy_gym_backend.services.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -18,11 +21,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -78,28 +84,248 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLoginUnauthorized() throws Exception {
+    void testLoginUnauthorizedUserNotFound() throws Exception {
         AuthRequest request = new AuthRequest();
-        request.setCorreoElectronico("user@example.com");
-        request.setContrasena("wrongpassword");
+        request.setCorreoElectronico("nonexistent@example.com");
+        request.setContrasena("anypassword");
 
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Credenciales inválidas o usuario inactivo."));
+    }
+
+    @Test
+    void testLoginUnauthorizedWrongPassword() throws Exception {
+        String password = "plainpassword";
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+        User user = new User();
+        user.setEmail("user@example.com");
+        user.setPassword(hashedPassword);
+        user.setIsActive(true);
+
+        AuthRequest request = new AuthRequest();
+        request.setCorreoElectronico("user@example.com");
+        request.setContrasena("wrongpassword");
+
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Credenciales inválidas o usuario inactivo."));
+    }
+
+    @Test
+    void testLoginUnauthorizedInactiveUser() throws Exception {
+        String password = "plainpassword";
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+        User user = new User();
+        user.setEmail("user@example.com");
+        user.setPassword(hashedPassword);
+        user.setIsActive(false);
+
+        AuthRequest request = new AuthRequest();
+        request.setCorreoElectronico("user@example.com");
+        request.setContrasena(password);
+
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Credenciales inválidas o usuario inactivo."));
+    }
+
+    @Test
+    void testLoginInternalServerError() throws Exception {
+        AuthRequest request = new AuthRequest();
+        request.setCorreoElectronico("user@example.com");
+        request.setContrasena("password");
+
+        when(userRepository.findByEmail(any())).thenThrow(new RuntimeException("Database down"));
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("Error en el microservicio de autenticación: Database down"));
     }
 
     @Test
     void testGoogleLoginInvalidToken() throws Exception {
         GoogleAuthRequest request = new GoogleAuthRequest("invalid-id-token");
 
-        // The verifier logic inside controller will throw IllegalArgumentException for mock-id-token
-        // This is caught by GlobalExceptionHandler and returns a 500 error payload.
-        mockMvc.perform(post("/auth/google")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isInternalServerError());
+        try (MockedConstruction<GoogleIdTokenVerifier.Builder> ignored = Mockito.mockConstruction(GoogleIdTokenVerifier.Builder.class, (mockBuilder, context) -> {
+            when(mockBuilder.setAudience(any())).thenReturn(mockBuilder);
+            GoogleIdTokenVerifier mockVerifier = Mockito.mock(GoogleIdTokenVerifier.class);
+            when(mockVerifier.verify(anyString())).thenReturn(null);
+            when(mockBuilder.build()).thenReturn(mockVerifier);
+        })) {
+            mockMvc.perform(post("/auth/google")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(content().string("Token de Google inválido."));
+        }
+    }
+
+    @Test
+    void testGoogleLoginSuccessExistingUser() throws Exception {
+        GoogleAuthRequest request = new GoogleAuthRequest("valid-id-token");
+
+        User user = new User();
+        user.setEmail("googleuser@example.com");
+        user.setIsActive(true);
+        Role role = new Role();
+        role.setName(Role.RoleType.ROLE_USER);
+        user.setRoles(new HashSet<>(Collections.singletonList(role)));
+
+        when(userRepository.findByEmail("googleuser@example.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(any(), any())).thenReturn("mocked-jwt-token");
+
+        GoogleIdToken mockIdToken = Mockito.mock(GoogleIdToken.class);
+        GoogleIdToken.Payload mockPayload = Mockito.mock(GoogleIdToken.Payload.class);
+        when(mockIdToken.getPayload()).thenReturn(mockPayload);
+        when(mockPayload.getEmail()).thenReturn("googleuser@example.com");
+
+        try (MockedConstruction<GoogleIdTokenVerifier.Builder> ignored = Mockito.mockConstruction(GoogleIdTokenVerifier.Builder.class, (mockBuilder, context) -> {
+            when(mockBuilder.setAudience(any())).thenReturn(mockBuilder);
+            GoogleIdTokenVerifier mockVerifier = Mockito.mock(GoogleIdTokenVerifier.class);
+            when(mockVerifier.verify(anyString())).thenReturn(mockIdToken);
+            when(mockBuilder.build()).thenReturn(mockVerifier);
+        })) {
+            mockMvc.perform(post("/auth/google")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.token").value("mocked-jwt-token"))
+                    .andExpect(jsonPath("$.user.email").value("googleuser@example.com"));
+        }
+    }
+
+    @Test
+    void testGoogleLoginInactiveUser() throws Exception {
+        GoogleAuthRequest request = new GoogleAuthRequest("valid-id-token");
+
+        User user = new User();
+        user.setEmail("googleuser@example.com");
+        user.setIsActive(false);
+
+        when(userRepository.findByEmail("googleuser@example.com")).thenReturn(Optional.of(user));
+
+        GoogleIdToken mockIdToken = Mockito.mock(GoogleIdToken.class);
+        GoogleIdToken.Payload mockPayload = Mockito.mock(GoogleIdToken.Payload.class);
+        when(mockIdToken.getPayload()).thenReturn(mockPayload);
+        when(mockPayload.getEmail()).thenReturn("googleuser@example.com");
+
+        try (MockedConstruction<GoogleIdTokenVerifier.Builder> ignored = Mockito.mockConstruction(GoogleIdTokenVerifier.Builder.class, (mockBuilder, context) -> {
+            when(mockBuilder.setAudience(any())).thenReturn(mockBuilder);
+            GoogleIdTokenVerifier mockVerifier = Mockito.mock(GoogleIdTokenVerifier.class);
+            when(mockVerifier.verify(anyString())).thenReturn(mockIdToken);
+            when(mockBuilder.build()).thenReturn(mockVerifier);
+        })) {
+            mockMvc.perform(post("/auth/google")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().string("El usuario está inactivo."));
+        }
+    }
+
+    @Test
+    void testGoogleLoginSuccessNewUserWithRoleUser() throws Exception {
+        GoogleAuthRequest request = new GoogleAuthRequest("valid-id-token");
+
+        when(userRepository.findByEmail("newgoogleuser@example.com")).thenReturn(Optional.empty());
+
+        Role defaultRole = new Role();
+        defaultRole.setName(Role.RoleType.ROLE_USER);
+        when(roleRepository.findByName(Role.RoleType.ROLE_USER)).thenReturn(Optional.of(defaultRole));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jwtService.generateToken(any(), any())).thenReturn("new-user-jwt-token");
+
+        GoogleIdToken mockIdToken = Mockito.mock(GoogleIdToken.class);
+        GoogleIdToken.Payload mockPayload = Mockito.mock(GoogleIdToken.Payload.class);
+        when(mockIdToken.getPayload()).thenReturn(mockPayload);
+        when(mockPayload.getEmail()).thenReturn("newgoogleuser@example.com");
+        when(mockPayload.get("given_name")).thenReturn("First");
+        when(mockPayload.get("family_name")).thenReturn("Last");
+
+        try (MockedConstruction<GoogleIdTokenVerifier.Builder> ignored = Mockito.mockConstruction(GoogleIdTokenVerifier.Builder.class, (mockBuilder, context) -> {
+            when(mockBuilder.setAudience(any())).thenReturn(mockBuilder);
+            GoogleIdTokenVerifier mockVerifier = Mockito.mock(GoogleIdTokenVerifier.class);
+            when(mockVerifier.verify(anyString())).thenReturn(mockIdToken);
+            when(mockBuilder.build()).thenReturn(mockVerifier);
+        })) {
+            mockMvc.perform(post("/auth/google")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.token").value("new-user-jwt-token"))
+                    .andExpect(jsonPath("$.user.email").value("newgoogleuser@example.com"));
+        }
+    }
+
+    @Test
+    void testGoogleLoginSuccessNewUserWithRoleMember() throws Exception {
+        GoogleAuthRequest request = new GoogleAuthRequest("valid-id-token");
+
+        when(userRepository.findByEmail("newgoogleuser@example.com")).thenReturn(Optional.empty());
+
+        Role memberRole = new Role();
+        memberRole.setName(Role.RoleType.ROLE_MEMBER);
+        when(roleRepository.findByName(Role.RoleType.ROLE_USER)).thenReturn(Optional.empty());
+        when(roleRepository.findByName(Role.RoleType.ROLE_MEMBER)).thenReturn(Optional.of(memberRole));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jwtService.generateToken(any(), any())).thenReturn("new-user-jwt-token");
+
+        GoogleIdToken mockIdToken = Mockito.mock(GoogleIdToken.class);
+        GoogleIdToken.Payload mockPayload = Mockito.mock(GoogleIdToken.Payload.class);
+        when(mockIdToken.getPayload()).thenReturn(mockPayload);
+        when(mockPayload.getEmail()).thenReturn("newgoogleuser@example.com");
+        when(mockPayload.get("given_name")).thenReturn("First");
+        when(mockPayload.get("family_name")).thenReturn("Last");
+
+        try (MockedConstruction<GoogleIdTokenVerifier.Builder> ignored = Mockito.mockConstruction(GoogleIdTokenVerifier.Builder.class, (mockBuilder, context) -> {
+            when(mockBuilder.setAudience(any())).thenReturn(mockBuilder);
+            GoogleIdTokenVerifier mockVerifier = Mockito.mock(GoogleIdTokenVerifier.class);
+            when(mockVerifier.verify(anyString())).thenReturn(mockIdToken);
+            when(mockBuilder.build()).thenReturn(mockVerifier);
+        })) {
+            mockMvc.perform(post("/auth/google")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    @Test
+    void testGoogleLoginException() throws Exception {
+        GoogleAuthRequest request = new GoogleAuthRequest("valid-id-token");
+
+        try (MockedConstruction<GoogleIdTokenVerifier.Builder> ignored = Mockito.mockConstruction(GoogleIdTokenVerifier.Builder.class, (mockBuilder, context) -> {
+            when(mockBuilder.setAudience(any())).thenReturn(mockBuilder);
+            GoogleIdTokenVerifier mockVerifier = Mockito.mock(GoogleIdTokenVerifier.class);
+            try {
+                when(mockVerifier.verify(anyString())).thenThrow(new GeneralSecurityException("Security violation"));
+            } catch (GeneralSecurityException | IOException e) {
+                // Mock throw setup
+            }
+            when(mockBuilder.build()).thenReturn(mockVerifier);
+        })) {
+            mockMvc.perform(post("/auth/google")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(content().string("Error al validar autenticación con Google: Security violation"));
+        }
     }
 }
